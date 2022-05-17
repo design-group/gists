@@ -58,9 +58,9 @@ def getGatewayFileContents(file_path, force_refresh=False, store_in_globals=True
 			
 		# NOTE: Set the reference in the globals to the new data
 		ignition_globals[GATEWAY_FILES_KEY][file_path] = {
-															'data': file_contents, 
-															'lastModifiedTime': os.path.getmtime(file_path)
-															}
+								'data': file_contents, 
+								'lastModifiedTime': os.path.getmtime(file_path)
+								}
 															
 		logger.info("Updating Gateway File in Cache: %s" % file_path)
 	
