@@ -67,7 +67,7 @@ def getGatewayFileContents(file_path, force_refresh=False, store_in_globals=True
 	# NOTE: If we ar enot executing in the gateway scope, then file paths will be relative to the client which we dont want. Sending a request to the gateway will allow it to read gateway files 
 	if not is_gateway:
 		project = system.util.getProjectName()
-		return system.util.sendRequest(project, "executeInGatewayScope", {"func":"myScript.myFunction", 'kwargs':{"file_path":file_path, 'force_refresh':force_refresh, 'store_in_globals':store_in_globals }})
+		return system.util.sendRequest(project, "executeInGatewayScope", {"func":"GatewayFileContents.getGatewayFileContents", 'kwargs':{"file_path":file_path, 'force_refresh':force_refresh, 'store_in_globals':store_in_globals }})
 	
 	
 	if not os.path.exists(file_path):
