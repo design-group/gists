@@ -1,13 +1,40 @@
 import os
 logger = system.util.getLogger("GatewayFileContents")
 
-"""
-In order for this to work, you need to add a gateway message handler under the name 'getGatewayFileContents'
+'''
+This script leverages a gateway message handler, called "executeInGatewayScope". The purpose of this message handler takes any calls made in the client scope, and moves them over to the gateway. That way when files are read, they come off the gateway file system and not the local development environment.
+
 That message handler should take the following arguments: 
-	file_path (REQ, str) - The string file path relavant to the "ignition" directory
-	force_refresh (OPT, bool) - a boolean that can tell the functionality to force the file to update even if the modificiation time is not newer
-	store_in_globals (OPT, bool) - a boolean that decides wether or not you should store this object in the ignition cache for performance.
-"""
+	func (REQ, str) - The fully qualified path of a function in the designated project
+	kwargs (OPT, dict) - A dictionary containing the key-value pairs that match up to the functions keyword arguments
+
+The definition of the "executeInGatewayScope" function is as follows:
+
+def handleMessage(payload):
+	"""
+	This message handler will be called each time a message of this
+	type is received.
+
+	Arguments:
+		payload: A dictionary that holds the objects passed to this
+			 message handler. Retrieve them with a subscript, e.g.
+			 myObject = payload['argumentName']
+	"""
+	
+	"""
+	Example call in project scope: 
+		system.util.sendRequest(project, "executeInGatewayScope", {"func":"myScript.myFunction", 'kwargs':{"myParam1":123,"myParam2":456}}), 
+	"""
+	
+	if payload.get('func') is None:
+		raise TypeError("executeInGatewayScope expects a payload object named func")
+	
+	func_reference = eval(payload['func'])
+	kwargs = payload.get('kwargs', {})
+	
+	return func_reference(**kwargs)
+
+'''
 
 
 
@@ -40,7 +67,7 @@ def getGatewayFileContents(file_path, force_refresh=False, store_in_globals=True
 	# NOTE: If we ar enot executing in the gateway scope, then file paths will be relative to the client which we dont want. Sending a request to the gateway will allow it to read gateway files 
 	if not is_gateway:
 		project = system.util.getProjectName()
-		return system.util.sendRequest(project, "getGatewayFileContents", {"file_path":file_path, 'force_refresh':force_refresh, 'store_in_globals':store_in_globals })
+		return system.util.sendRequest(project, "executeInGatewayScope", {"func":"myScript.myFunction", 'kwargs':{"file_path":file_path, 'force_refresh':force_refresh, 'store_in_globals':store_in_globals }})
 	
 	
 	if not os.path.exists(file_path):
